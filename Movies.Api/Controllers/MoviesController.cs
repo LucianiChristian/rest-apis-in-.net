@@ -2,13 +2,14 @@
 using Movies.Api.Mapping;
 using Movies.Application.Models;
 using Movies.Application.Repositories;
+using Movies.Application.Services;
 using Movies.Contracts.Requests;
 using Movies.Contracts.Responses;
 
 namespace Movies.Api.Controllers;
 
 [ApiController]
-public class MoviesController(IMovieRepository movieRepository) : ControllerBase
+public class MoviesController(IMovieService movieRepository) : ControllerBase
 {
     [HttpGet(ApiEndpoints.Movies.GetAll)]
     public async Task<IActionResult> GetAll()
@@ -57,11 +58,11 @@ public class MoviesController(IMovieRepository movieRepository) : ControllerBase
     [HttpPut(ApiEndpoints.Movies.Update)]
     public async Task<IActionResult> Update(Guid id, UpdateMovieRequest request)
     {
-        var updatedMovie = request.MapToMovie(id);
+        var movie = request.MapToMovie(id);
 
-        var updatedSuccessfully = await movieRepository.UpdateAsync(updatedMovie);
+        var updatedMovie = await movieRepository.UpdateAsync(movie);
 
-        if (!updatedSuccessfully)
+        if (updatedMovie is null)
         {
             return NotFound();
         }
