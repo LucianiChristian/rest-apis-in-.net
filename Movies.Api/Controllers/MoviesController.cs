@@ -12,9 +12,9 @@ namespace Movies.Api.Controllers;
 public class MoviesController(IMovieService movieRepository) : ControllerBase
 {
     [HttpGet(ApiEndpoints.Movies.GetAll)]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(CancellationToken token)
     {
-        var movies = await movieRepository.GetAllAsync();
+        var movies = await movieRepository.GetAllAsync(token);
 
         var moviesResponse = movies.MapToMoviesResponse();
 
@@ -22,11 +22,11 @@ public class MoviesController(IMovieService movieRepository) : ControllerBase
     }
 
     [HttpGet(ApiEndpoints.Movies.Get)]
-    public async Task<IActionResult> Get(string idOrSlug)
+    public async Task<IActionResult> Get(string idOrSlug, CancellationToken token)
     {
         var movie = Guid.TryParse(idOrSlug, out var id) ? 
-            await movieRepository.GetByIdAsync(id) :
-            await movieRepository.GetBySlugAsync(idOrSlug);
+            await movieRepository.GetByIdAsync(id, token) :
+            await movieRepository.GetBySlugAsync(idOrSlug, token);
 
         if (movie is null)
         {
@@ -39,11 +39,11 @@ public class MoviesController(IMovieService movieRepository) : ControllerBase
     }
 
     [HttpPost(ApiEndpoints.Movies.Create)]
-    public async Task<IActionResult> Create(CreateMovieRequest request)
+    public async Task<IActionResult> Create(CreateMovieRequest request, CancellationToken token)
     {
         var movie = request.MapToMovie();
         
-        var createdSuccessfully = await movieRepository.CreateAsync(movie);
+        var createdSuccessfully = await movieRepository.CreateAsync(movie, token);
 
         if (!createdSuccessfully)
         {
@@ -56,11 +56,11 @@ public class MoviesController(IMovieService movieRepository) : ControllerBase
     }
 
     [HttpPut(ApiEndpoints.Movies.Update)]
-    public async Task<IActionResult> Update(Guid id, UpdateMovieRequest request)
+    public async Task<IActionResult> Update(Guid id, UpdateMovieRequest request, CancellationToken token)
     {
         var movie = request.MapToMovie(id);
 
-        var updatedMovie = await movieRepository.UpdateAsync(movie);
+        var updatedMovie = await movieRepository.UpdateAsync(movie, token);
 
         if (updatedMovie is null)
         {
@@ -71,9 +71,9 @@ public class MoviesController(IMovieService movieRepository) : ControllerBase
     }
 
     [HttpDelete(ApiEndpoints.Movies.Delete)]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken token)
     {
-        var deletedSuccessfully = await movieRepository.DeleteByIdAsync(id);
+        var deletedSuccessfully = await movieRepository.DeleteByIdAsync(id, token);
 
         if (!deletedSuccessfully)
         {
